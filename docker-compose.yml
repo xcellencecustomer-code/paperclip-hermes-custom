@@ -20,6 +20,20 @@ services:
     restart: unless-stopped
     expose:
       - 3100
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.paperclip-test-https.rule=Host(`paperclip-test.xcellence.uk`)
+      - traefik.http.routers.paperclip-test-https.entryPoints=https
+      - traefik.http.routers.paperclip-test-https.tls=true
+      - traefik.http.routers.paperclip-test-https.tls.certresolver=letsencrypt
+      - traefik.http.routers.paperclip-test-https.service=paperclip-test
+      - traefik.http.services.paperclip-test.loadbalancer.server.port=3100
+      - traefik.http.routers.paperclip-test-http.rule=Host(`paperclip-test.xcellence.uk`)
+      - traefik.http.routers.paperclip-test-http.entryPoints=http
+      - traefik.http.routers.paperclip-test-http.middlewares=redirect-to-https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+    networks:
+      - coolify
   db:
     image: 'postgres:17-alpine'
     environment:
@@ -36,5 +50,8 @@ services:
     volumes:
       - 'paperclip-db-data:/var/lib/postgresql/data'
     restart: unless-stopped
+networks:
+  coolify:
+    external: true
 volumes:
   paperclip-db-data: null
