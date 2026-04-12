@@ -1,0 +1,38 @@
+services:
+  server:
+    build: .
+    environment:
+      DATABASE_URL: 'postgres://paperclip:paperclip_pass_123@db:5432/paperclip'
+      PORT: 3100
+      SERVE_UI: 'true'
+      PAPERCLIP_DEPLOYMENT_MODE: authenticated
+      PAPERCLIP_DEPLOYMENT_EXPOSURE: private
+      BETTER_AUTH_SECRET: sXFbHpdBiyTxXKI+NzhUCBOVfdHevEOE1/I5KntaVhY=
+      OLLAMA_BASE_URL: 'https://ollama.com'
+      OLLAMA_API_KEY: 5bf9d005a6824e23b87c00759fa5e54e.RgoUz7lScVQc7CkpW717hVPL
+      OPENROUTER_API_KEY: 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
+      HERMES_HOME: /root/.hermes
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    expose:
+      - 3100
+  db:
+    image: 'postgres:17-alpine'
+    environment:
+      POSTGRES_USER: paperclip
+      POSTGRES_PASSWORD: paperclip_pass_123
+      POSTGRES_DB: paperclip
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'pg_isready -U paperclip -d paperclip'
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - 'paperclip-db-data:/var/lib/postgresql/data'
+    restart: unless-stopped
+volumes:
+  paperclip-db-data: null
