@@ -2,8 +2,10 @@ services:
   server:
     build: .
     environment:
+      COOLIFY_SERVICE_FQDN_SERVER: 'https://paperclip-test.xcellence.uk'
       DATABASE_URL: 'postgres://paperclip:paperclip_pass_123@db:5432/paperclip'
       PORT: 3100
+      PAPERCLIP_PUBLIC_URL: 'https://paperclip-test.xcellence.uk'
       SERVE_UI: 'true'
       PAPERCLIP_DEPLOYMENT_MODE: authenticated
       PAPERCLIP_DEPLOYMENT_EXPOSURE: private
