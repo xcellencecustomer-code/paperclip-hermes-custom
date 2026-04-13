@@ -31,3 +31,4 @@ RUN chmod +x /usr/local/bin/hermes-init.sh
 # Override ENTRYPOINT with our wrapper that calls the real one after init
 # hermes-init.sh does: fix perms → write .env → exec docker-entrypoint.sh "$@"
 ENTRYPOINT ["hermes-init.sh"]
+CMD ["node", "--import", "./server/node_modules/tsx/dist/loader.mjs", "server/dist/index.js"]
