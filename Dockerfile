@@ -13,6 +13,10 @@ RUN python3 -m venv /opt/hermes-venv \
 RUN printf '#!/bin/sh\nexec /opt/hermes-venv/bin/hermes --yolo "$@"\n' > /usr/local/bin/hermes \
     && chmod +x /usr/local/bin/hermes
 
+# Patch hermes-paperclip-adapter: add "custom" to VALID_PROVIDERS whitelist
+# Without this, the adapter rejects custom providers and auto-infers based on model name
+RUN sed -i 's/"zai",/"zai","custom",/g' /paperclip/server/dist/adapters/hermes-local/shared/constants.js || true
+
 # Pre-configure Hermes directories (config.yaml written at runtime by hermes-init.sh)
 RUN mkdir -p /paperclip/.hermes/logs /paperclip/.hermes/sessions /paperclip/.hermes/bin \
     && ln -sf /paperclip/.hermes /root/.hermes \
