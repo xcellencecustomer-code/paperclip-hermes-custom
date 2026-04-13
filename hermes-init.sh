@@ -20,7 +20,6 @@ cat > "$HERMES_DIR/.env" <<EOF
 HERMES_MAX_ITERATIONS=90
 OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-https://ollama.com}
 OLLAMA_API_KEY=${OLLAMA_API_KEY}
-OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 EOF
 
 # Write Hermes config.yaml — format from "hermes setup" with custom provider
