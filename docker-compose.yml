@@ -9,10 +9,10 @@ services:
       SERVE_UI: 'true'
       PAPERCLIP_DEPLOYMENT_MODE: authenticated
       PAPERCLIP_DEPLOYMENT_EXPOSURE: private
-      BETTER_AUTH_SECRET: sXFbHpdBiyTxXKI+NzhUCBOVfdHevEOE1/I5KntaVhY=
-      OLLAMA_BASE_URL: 'https://ollama.com'
-      OLLAMA_API_KEY: 5bf9d005a6824e23b87c00759fa5e54e.RgoUz7lScVQc7CkpW717hVPL
-      OPENROUTER_API_KEY: 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
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-https://ollama.com}
+      OLLAMA_API_KEY: ${OLLAMA_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       HERMES_HOME: /paperclip/.hermes
     depends_on:
       db:
