@@ -12,7 +12,6 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-https://ollama.com}
       OLLAMA_API_KEY: ${OLLAMA_API_KEY}
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       HERMES_HOME: /paperclip/.hermes
     depends_on:
       db:

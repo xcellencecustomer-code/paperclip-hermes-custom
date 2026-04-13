@@ -20,7 +20,6 @@ cat > "$HERMES_DIR/.env" <<EOF
 HERMES_MAX_ITERATIONS=90
 OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-https://ollama.com}
 OLLAMA_API_KEY=${OLLAMA_API_KEY}
-OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 EOF
 
 # Write Hermes config.yaml — format from "hermes setup" with custom provider
@@ -53,9 +52,8 @@ chmod -R 777 /paperclip/instances
 # Export keys so child processes (hermes spawned by paperclip) inherit them
 export OLLAMA_API_KEY="${OLLAMA_API_KEY}"
 export OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-https://ollama.com}"
-export OPENROUTER_API_KEY="${OPENROUTER_API_KEY}"
 
-echo "[hermes-init] Hermes ready (OLLAMA_BASE_URL=${OLLAMA_BASE_URL}, OPENROUTER=set)"
+echo "[hermes-init] Hermes ready (OLLAMA_BASE_URL=${OLLAMA_BASE_URL})"
 
 # Hand off to the REAL Paperclip entrypoint
 exec /usr/local/bin/docker-entrypoint.sh "$@"
