@@ -23,11 +23,17 @@ OLLAMA_API_KEY=${OLLAMA_API_KEY}
 OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 EOF
 
-# Patch config.yaml with correct API key if it exists
-# This fixes the case where hermes setup was run with a wrong key
-if [ -f "$HERMES_DIR/config.yaml" ] && [ -n "$OLLAMA_API_KEY" ]; then
-    sed -i "s|api_key:.*|api_key: ${OLLAMA_API_KEY}|g" "$HERMES_DIR/config.yaml"
-fi
+# Write complete Hermes config.yaml with Ollama Cloud settings
+# Ensures GLM 5.1 model is properly configured with API key at runtime
+cat > "$HERMES_DIR/config.yaml" <<EOF
+inference:
+  provider: ollama
+  model: glm-5.1
+  api_key: ${OLLAMA_API_KEY}
+  base_url: ${OLLAMA_BASE_URL:-https://ollama.com}
+yolo: true
+max_iterations: 90
+EOF
 
 # Ensure symlink /root/.hermes -> /paperclip/.hermes
 ln -sf "$HERMES_DIR" /root/.hermes 2>/dev/null || true

@@ -13,9 +13,8 @@ RUN python3 -m venv /opt/hermes-venv \
 RUN printf '#!/bin/sh\nexec /opt/hermes-venv/bin/hermes --yolo "$@"\n' > /usr/local/bin/hermes \
     && chmod +x /usr/local/bin/hermes
 
-# Pre-configure Hermes directories and config
+# Pre-configure Hermes directories (config.yaml written at runtime by hermes-init.sh)
 RUN mkdir -p /paperclip/.hermes/logs /paperclip/.hermes/sessions /paperclip/.hermes/bin \
-    && printf 'inference:\n  provider: ollama\n  model: glm-5.1\nyolo: true\n' > /paperclip/.hermes/config.yaml \
     && ln -sf /paperclip/.hermes /root/.hermes \
     && chmod 755 /root
 
