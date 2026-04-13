@@ -23,12 +23,21 @@ OLLAMA_API_KEY=${OLLAMA_API_KEY}
 OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 EOF
 
-# Write Hermes config.yaml — uses "model: provider/model" format (not inference blocks)
-# API keys are read from .env, not from config.yaml
+# Write Hermes config.yaml — format from "hermes setup" with custom provider
 cat > "$HERMES_DIR/config.yaml" <<EOF
-model: ollama/glm-5.1
-max_iterations: 90
+model:
+  default: glm-5.1
+  provider: custom
+  base_url: ${OLLAMA_BASE_URL:-https://ollama.com}/v1
+  api_key: ${OLLAMA_API_KEY}
+custom_providers:
+- name: Ollama.com
+  base_url: ${OLLAMA_BASE_URL:-https://ollama.com}/v1
+  model: glm-5.1
 yolo: true
+max_iterations: 90
+agent:
+  max_turns: 90
 EOF
 
 # Ensure symlink /root/.hermes -> /paperclip/.hermes
