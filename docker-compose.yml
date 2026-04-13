@@ -13,7 +13,7 @@ services:
       OLLAMA_BASE_URL: 'https://ollama.com'
       OLLAMA_API_KEY: 5bf9d005a6824e23b87c00759fa5e54e.RgoUz7lScVQc7CkpW717hVPL
       OPENROUTER_API_KEY: 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
-      HERMES_HOME: /root/.hermes
+      HERMES_HOME: /paperclip/.hermes
     depends_on:
       db:
         condition: service_healthy
