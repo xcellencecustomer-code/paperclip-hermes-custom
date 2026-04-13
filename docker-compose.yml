@@ -12,7 +12,7 @@ services:
       BETTER_AUTH_SECRET: sXFbHpdBiyTxXKI+NzhUCBOVfdHevEOE1/I5KntaVhY=
       OLLAMA_BASE_URL: 'https://ollama.com'
       OLLAMA_API_KEY: 5bf9d005a6824e23b87c00759fa5e54e.RgoUz7lScVQc7CkpW717hVPL
-      OPENROUTER_API_KEY: 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
+      OPENROUTER_API_KEY: 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
       HERMES_HOME: /paperclip/.hermes
     depends_on:
       db:
