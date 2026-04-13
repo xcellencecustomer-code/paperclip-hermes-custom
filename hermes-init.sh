@@ -23,14 +23,16 @@ OLLAMA_API_KEY=${OLLAMA_API_KEY}
 OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 EOF
 
-# Write complete Hermes config.yaml with Ollama Cloud settings
-# Ensures GLM 5.1 model is properly configured with API key at runtime
+# Write complete Hermes config.yaml with Ollama Cloud + OpenRouter settings
 cat > "$HERMES_DIR/config.yaml" <<EOF
 inference:
   provider: ollama
   model: glm-5.1
   api_key: ${OLLAMA_API_KEY}
   base_url: ${OLLAMA_BASE_URL:-https://ollama.com}
+auxiliary:
+  provider: openrouter
+  api_key: ${OPENROUTER_API_KEY}
 yolo: true
 max_iterations: 90
 EOF
@@ -45,7 +47,12 @@ chown -R node:node /paperclip/instances
 chmod -R 777 /paperclip/.hermes
 chmod -R 777 /paperclip/instances
 
-echo "[hermes-init] Hermes ready (OLLAMA_BASE_URL=${OLLAMA_BASE_URL})"
+# Export keys so child processes (hermes spawned by paperclip) inherit them
+export OLLAMA_API_KEY="${OLLAMA_API_KEY}"
+export OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-https://ollama.com}"
+export OPENROUTER_API_KEY="${OPENROUTER_API_KEY}"
+
+echo "[hermes-init] Hermes ready (OLLAMA_BASE_URL=${OLLAMA_BASE_URL}, OPENROUTER=set)"
 
 # Hand off to the REAL Paperclip entrypoint
 exec /usr/local/bin/docker-entrypoint.sh "$@"
