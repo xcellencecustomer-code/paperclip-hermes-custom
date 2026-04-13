@@ -15,14 +15,21 @@ OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-https://ollama.com}
 OLLAMA_API_KEY=${OLLAMA_API_KEY}
 EOF
 
+# Patch config.yaml with correct API key if it exists
+# This fixes the case where hermes setup was run with a wrong key
+if [ -f "$HERMES_DIR/config.yaml" ] && [ -n "$OLLAMA_API_KEY" ]; then
+    sed -i "s|api_key:.*|api_key: ${OLLAMA_API_KEY}|g" "$HERMES_DIR/config.yaml"
+fi
+
 # Ensure symlink /root/.hermes -> /paperclip/.hermes
 ln -sf "$HERMES_DIR" /root/.hermes 2>/dev/null || true
 chmod 755 /root 2>/dev/null || true
 
-# Fix permissions — this runs as root so chown works
+# Fix ALL permissions — covers any files created by root at runtime
 chown -R node:node /paperclip/.hermes
 chown -R node:node /paperclip/instances
 chmod -R 777 /paperclip/.hermes
+chmod -R 777 /paperclip/instances
 
 echo "[hermes-init] Hermes ready (OLLAMA_BASE_URL=${OLLAMA_BASE_URL})"
 
