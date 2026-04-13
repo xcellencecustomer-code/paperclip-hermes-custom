@@ -8,11 +8,19 @@ HERMES_DIR="${HERMES_HOME:-/paperclip/.hermes}"
 mkdir -p "$HERMES_DIR/logs" "$HERMES_DIR/sessions"
 mkdir -p /paperclip/instances/default/data/run-logs
 
+# Clean stale sessions — prevents Hermes from resuming corrupted/old sessions
+rm -rf "$HERMES_DIR/sessions/"* 2>/dev/null || true
+
+# Clean stale credential cache — prevents "credential pool exhausted" errors
+rm -f "$HERMES_DIR/state.db" "$HERMES_DIR/state.db-shm" "$HERMES_DIR/state.db-wal" 2>/dev/null || true
+rm -f "$HERMES_DIR/auth.json" "$HERMES_DIR/auth.lock" 2>/dev/null || true
+
 # Write .env with API keys from Docker env vars
 cat > "$HERMES_DIR/.env" <<EOF
 HERMES_MAX_ITERATIONS=90
 OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-https://ollama.com}
 OLLAMA_API_KEY=${OLLAMA_API_KEY}
+OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 EOF
 
 # Patch config.yaml with correct API key if it exists
