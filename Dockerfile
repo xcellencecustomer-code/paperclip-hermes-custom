@@ -14,26 +14,21 @@ RUN printf '#!/bin/sh\nexec /opt/hermes-venv/bin/hermes --yolo "$@"\n' > /usr/lo
     && chmod +x /usr/local/bin/hermes
 
 # Pre-configure Hermes directories and config
-# /paperclip/.hermes is the real config dir, symlinked from /root/.hermes
-# Both root and node user access the same files
 RUN mkdir -p /paperclip/.hermes/logs /paperclip/.hermes/sessions /paperclip/.hermes/bin \
     && printf 'inference:\n  provider: ollama\n  model: glm-5.1\nyolo: true\n' > /paperclip/.hermes/config.yaml \
     && ln -sf /paperclip/.hermes /root/.hermes \
     && chmod 755 /root
 
 # Pre-create Paperclip instances directory
-RUN mkdir -p /paperclip/instances/default/data/run-logs
-
-# Set ownership for node user (Paperclip runs as node via gosu)
-RUN chown -R node:node /paperclip/.hermes /paperclip/instances \
+RUN mkdir -p /paperclip/instances/default/data/run-logs \
+    && chown -R node:node /paperclip/.hermes /paperclip/instances \
     && chmod -R 777 /paperclip/.hermes
 
-# Init script: writes API keys from env vars into Hermes .env at container start
-# This runs BEFORE the original entrypoint hands off to gosu node
+# Init script: runs as root, fixes perms, writes .env, then calls real entrypoint
 COPY hermes-init.sh /usr/local/bin/hermes-init.sh
 RUN chmod +x /usr/local/bin/hermes-init.sh
 
-# DO NOT override ENTRYPOINT — it breaks gosu/Paperclip chain
-# Instead, the original entrypoint runs: docker-entrypoint.sh → gosu node → CMD
-# We prepend our init to CMD so it runs as node
-CMD ["sh", "-c", "/usr/local/bin/hermes-init.sh && node dist/index.js"]
+# Override ENTRYPOINT with our wrapper that calls the real one after init
+# hermes-init.sh does: fix perms → write .env → exec docker-entrypoint.sh "$@"
+ENTRYPOINT ["hermes-init.sh"]
+CMD ["node", "dist/index.js"]
