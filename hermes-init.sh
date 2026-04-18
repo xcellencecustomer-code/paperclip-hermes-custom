@@ -67,17 +67,42 @@ chmod -R 777 /paperclip/instances
 ln -sf /paperclip/.hermes /root/.hermes 2>/dev/null || true
 chmod 755 /root 2>/dev/null || true
 
-# Patch hermes-paperclip-adapter: add "custom" to VALID_PROVIDERS whitelist.
-# The adapter is installed at runtime by Paperclip via npx into a hashed path
-# (/paperclip/.npm/_npx/<hash>/...), so we patch dynamically in background
-# once the file appears.
+# Patch hermes-paperclip-adapter (background-wait — npx installs it after startup).
+# 1. VALID_PROVIDERS: add "custom" so provider:custom is accepted.
+# 2. SESSION_ID_REGEX_LEGACY: tighten the regex so it doesn't capture plain words
+#    like "from" out of error messages ("Use a session ID from a previous CLI run").
+#    The original regex /session[_ ](?:id|saved)[:\s]+([a-zA-Z0-9_-]+)/ matches
+#    "session ID from" → stores "from" as sessionId → --resume from loop on next run.
+#    Fixed regex requires ':' separator and ≥8 chars (real session IDs are ≥20 chars).
 (
     TRIES=0
     while [ $TRIES -lt 60 ]; do
-        FILE=$(find /paperclip/.npm -path '*hermes-paperclip-adapter/dist/shared/constants.js' 2>/dev/null | head -1)
-        if [ -n "$FILE" ]; then
-            sed -i 's/"zai",/"zai","custom",/g' "$FILE" 2>/dev/null && \
-                echo "[hermes-init] Patched VALID_PROVIDERS in $FILE"
+        CONSTANTS=$(find /paperclip/.npm -path '*hermes-paperclip-adapter/dist/shared/constants.js' 2>/dev/null | head -1)
+        EXECUTE=$(find /paperclip/.npm -path '*hermes-paperclip-adapter/dist/server/execute.js' 2>/dev/null | head -1)
+        if [ -n "$CONSTANTS" ] && [ -n "$EXECUTE" ]; then
+            # Patch 1: add "custom" to VALID_PROVIDERS whitelist
+            sed -i 's/"zai",/"zai","custom",/g' "$CONSTANTS" 2>/dev/null && \
+                echo "[hermes-init] Patched VALID_PROVIDERS in $CONSTANTS"
+            # Patch 2: fix SESSION_ID_REGEX_LEGACY — the original regex captures plain
+            # words like "from" in error messages ("Use a session ID from a previous CLI run")
+            # and persists them as sessionId, causing --resume from loops.
+            # Python is used because sed cannot reliably escape nested regex syntax in JS.
+            python3 - "$EXECUTE" <<'PYEOF'
+import sys, re
+f = sys.argv[1]
+txt = open(f).read()
+# Replace the legacy regex: require ':' separator + min 8 chars (real IDs are 20+ chars)
+patched = re.sub(
+    r'SESSION_ID_REGEX_LEGACY\s*=\s*/[^/]+/i',
+    'SESSION_ID_REGEX_LEGACY = /session[_ ](?:id|saved):\\s+([a-zA-Z0-9_-]{8,})/i',
+    txt
+)
+if patched != txt:
+    open(f, 'w').write(patched)
+    print(f'[hermes-init] Patched SESSION_ID_REGEX_LEGACY in {f}')
+else:
+    print(f'[hermes-init] SESSION_ID_REGEX_LEGACY already patched or not found in {f}')
+PYEOF
             break
         fi
         TRIES=$((TRIES + 1))
